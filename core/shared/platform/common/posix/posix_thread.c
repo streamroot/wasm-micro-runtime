@@ -432,7 +432,10 @@ touch_pages(uint8 *stack_min_addr, uint32 page_size)
     while (1) {
         volatile uint8 *touch_addr = (volatile uint8 *)os_alloca(page_size / 2);
         if (touch_addr < stack_min_addr + page_size) {
-            sum += *(stack_min_addr + page_size - 1);
+            // NOTE(Corentin): It seems that touching the guard page on android
+            //                 provokes a SIGSEGV This is a hack to avoid it, it
+            //                 doesn't seem to break anything
+            sum += *(stack_min_addr + page_size);
             break;
         }
         *touch_addr = 0;
